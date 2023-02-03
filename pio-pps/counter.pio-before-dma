@@ -1,0 +1,39 @@
+.program counter
+    mov x !null         ; setup initial value
+main:
+    wait 0 pin 0        ; wait for low if high
+    wait 1 pin 0        ; wait for high
+    jmp x-- next        ; decrement counter
+next:
+    mov isr x
+    push noblock
+    jmp main
+
+% c-sdk {
+static inline void counter_program_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_sm_config c = counter_program_get_default_config(offset);
+
+    // set IN base pin to provided `pin` parameter, this is the reference clock
+    // pin+1 is the measured clock
+    sm_config_set_in_pins(&c, pin);
+    // set pins to in direction
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, false);
+    // connect GPIOs to this PIO block
+    pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, pin+1);
+
+    // configure the ISR 
+    //sm_config_set_in_shift(&c, true, false, 32);
+
+    // set jump pin
+    sm_config_set_jmp_pin(&c, pin);
+
+    // enable RX FIFO
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+    // load our config and start the program from the start
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+
+}
+%}
