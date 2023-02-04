@@ -29,10 +29,10 @@ void cir_buf_push(struct cir_buf* buf, uint32_t val) {
     buf->head = (buf->head + 1) % buf->max;
 }
 
-float cir_buf_avg(struct cir_buf* buf) {
+double cir_buf_avg(struct cir_buf* buf) {
     uint64_t total = 0;
     for(int i = 0;i < buf->size;i++) {
         total += buf->buffer[i];
     }
-    return total / buf->size;
+    return total / (double)buf->size;
 }

@@ -41,12 +41,22 @@ void pps_callback() {
     pio_interrupt_clear(pio, 0);
 }
 
-void update_display(struct LcdDisplay display, uint32_t freq, float avg) {
+void update_display(struct LcdDisplay display, uint32_t freq, double avg) {
     char *line1 = malloc(50 * sizeof(char));
-    sprintf(line1, "F: %dHz", freq);
     char *line2 = malloc(50 * sizeof(char));
-    sprintf(line2, "A: %.1fHz", avg);
 
+    // need to determine the scale
+    if(freq >= 1000000) {
+        double scaled_freq = (double)freq / 1000000;
+        sprintf(line1, "F:%.8fMHz", scaled_freq);
+        double scaled_avg = avg / 1000000;
+        sprintf(line2, "A:%.8fMHz", scaled_avg);
+    } else if (freq >= 1000) {
+        // this is kHz
+    } else {
+        // this is Hz
+    }
+    
     write_to_display_2_lines(line1, line2, display);
 
     free(line1);
@@ -140,7 +150,7 @@ int main() {
             uint32_t delta = prevCount - pulseCountSnapshot;
             uint32_t millis = to_ms_since_boot(ppsTime);
             cir_buf_push(avg_buf, delta);
-            float avg = cir_buf_avg(avg_buf);
+            double avg = cir_buf_avg(avg_buf);
             printf("%d %d %d %d %f\n", seconds, millis, pulseCountSnapshot, delta, avg);
             update_display(display, delta, avg);
             seconds++;
