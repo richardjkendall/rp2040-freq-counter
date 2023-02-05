@@ -51,3 +51,5 @@ iterationcount milliseconds rawpulsecount deltasincelastpulse avgdelta
 ```
 
 `avgdelta` is the average of the last 10 cycles of data, it is a double precision number.
+
+The LCD output assumes a 2 line display, and it outputs the current (instantaneous) frequency on the top line and the average on the bottom line.  
