@@ -47,14 +47,21 @@ void update_display(struct LcdDisplay display, uint32_t freq, double avg) {
 
     // need to determine the scale
     if(freq >= 1000000) {
+        // this is MHz
         double scaled_freq = (double)freq / 1000000;
         sprintf(line1, "F:%.8fMHz", scaled_freq);
         double scaled_avg = avg / 1000000;
         sprintf(line2, "A:%.8fMHz", scaled_avg);
     } else if (freq >= 1000) {
         // this is kHz
+        double scaled_freq = (double)freq / 1000;
+        sprintf(line1, "F:%.8fkHz", scaled_freq);
+        double scaled_avg = avg / 1000;
+        sprintf(line2, "A:%.8fkHz", scaled_avg);
     } else {
         // this is Hz
+        sprintf(line1, "F:%dHz", freq);
+        sprintf(line2, "A:%.8fHz", avg);
     }
     
     write_to_display_2_lines(line1, line2, display);
@@ -65,6 +72,14 @@ void update_display(struct LcdDisplay display, uint32_t freq, double avg) {
 
 int main() {
     stdio_init_all();
+
+    sleep_ms(3000);
+
+    bool clkset = set_sys_clock_khz(250000, false);
+    if(clkset) {
+        printf("Clock is set at 250Mhz");
+    }
+    
 
     // setup display
     struct LcdDisplay display = setup_display(LCD_RS_PIN, LCD_E_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
@@ -149,10 +164,13 @@ int main() {
         if(ppsFlag == 1) {
             uint32_t delta = prevCount - pulseCountSnapshot;
             uint32_t millis = to_ms_since_boot(ppsTime);
+            
             cir_buf_push(avg_buf, delta);
             double avg = cir_buf_avg(avg_buf);
+            
             printf("%d %d %d %d %f\n", seconds, millis, pulseCountSnapshot, delta, avg);
             update_display(display, delta, avg);
+            
             seconds++;
             prevCount = pulseCountSnapshot;
             ppsFlag = 0;
