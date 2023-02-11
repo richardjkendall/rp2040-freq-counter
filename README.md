@@ -8,6 +8,8 @@ They each follow the same basic design:
 
 Each subfolder contains a different implementation.
 
+I wrote a blog post about this here https://rjk.codes/post/building-a-frequency-counter/
+
 ## PWM
 
 This is in the `pwm` folder.  In this implementation, the hardware PWM block is used to count the pulses coming from the measured clock and a CPU interrupt attached to a GPIO pin is used to monitor the 1PPS signal.  
